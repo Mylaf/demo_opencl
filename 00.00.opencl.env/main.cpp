@@ -4,23 +4,28 @@
 #include <stdlib.h>
 #include <CL/cl.h>
 
-int main(void){
-    cl_int status;
+int main(int argc, const char** argv)
+{
+	// 获取可用的平台数量
+	cl_uint num_entries;
+	clGetPlatformIDs(0, NULL, &num_entries);
 
-    cl_uint numPlatforms = 0;
-    status = clGetPlatformIDs(0, NULL, &numPlatforms);
+	// 获取可用的平台
+	cl_platform_id* platforms = new cl_platform_id[num_entries];
+	clGetPlatformIDs(num_entries, platforms, NULL);
 
-    cl_platform_id *platforms = NULL;
-    platforms = (cl_platform_id *)malloc(numPlatforms * sizeof(cl_platform_id));
-    status = clGetPlatformIDs(numPlatforms, platforms, NULL);
+	// 输出平台名称
+	char param_value[512];
+	for (cl_uint i = 0; i < num_entries; i++) {
+		size_t param_value_size_ret;
+		//获取某个平台信息
+		clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 0, NULL, &param_value_size_ret);
+		clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, param_value_size_ret, param_value, NULL);
+		printf("platfrom %d name is %s\n", i + 1, param_value);
+	}
 
-    for(cl_uint i=0; i<numPlatforms; ++i){
-        char sz[1024];
-        size_t size;
-        status = clGetPlatformInfo(platforms[i], CL_DEVICE_NAME, 0, NULL, &size);
-        printf("platform name: %s\n", sz);
-    }
+	// 释放资源
+	delete[] platforms;
 
-
-    return 0;
+	return 0;
 }
